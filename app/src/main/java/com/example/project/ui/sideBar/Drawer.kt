@@ -1,9 +1,11 @@
 package com.example.project.ui.sideBar
 
-import androidx.compose.foundation.background
+import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,30 +23,36 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.project.ui.dashboard.Home
-import com.example.project.ui.theme.ProjectTheme
+import com.example.project.data.database.AppDatabase
+import com.example.project.ui.movie.BookMark
+import com.example.project.ui.movie.Detail
+import com.example.project.ui.movie.Home
 import com.example.project.ui.user.Login
 import com.example.project.ui.user.Register
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Drawer(navController: NavController) {
+fun Drawer(database: AppDatabase) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
     val isDrawerVisible = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val detail = remember { mutableStateOf(false) }
+    val id = remember { mutableStateOf(0) }
+    val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     ModalNavigationDrawer(drawerContent = {
                                         if (isDrawerVisible.value){
                                             DrawerContent(
                                                 navController = navController,
-                                                drawerState = drawerState
+                                                drawerState = drawerState,
+                                                context = context
                                             )
                                         }
     }, drawerState = drawerState,
@@ -72,6 +80,23 @@ fun Drawer(navController: NavController) {
                             }) {
                                 Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
                             }
+                        }else{
+                            IconButton(onClick = {
+                                navController.popBackStack()
+                            }) {
+                                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        }
+                    },
+                    actions = {
+                        if (id.value != 0 && sharedPrefs.getBoolean("isLogged",false)){
+                            IconButton(onClick = { /* Handle navigation icon click */ }) {
+                                Icon(
+                                    imageVector = Icons.Default.FavoriteBorder,
+                                    contentDescription = null,
+                                    tint = Color.Yellow
+                                )
+                            }
                         }
                     }
                 )
@@ -80,27 +105,33 @@ fun Drawer(navController: NavController) {
                 NavHost(navController = navController, startDestination = "Home") {
                     composable("Login") {
                         isDrawerVisible.value = false
-                        Login(navController = navController)
+                        id.value = 0
+                        Login(navController = navController, database, context)
                     }
                     composable(route = "Home") {
                         isDrawerVisible.value = true
+                        id.value = 0
                         Home(navController = navController)
+                    }
+                    composable(route = "Bookmark"){
+                        isDrawerVisible.value = true
+                        id.value = 0
+                        BookMark(navController = navController, database = database, context = context)
                     }
                     composable("Register") {
                         isDrawerVisible.value = false
-                        Register(navController = navController)
+                        id.value = 0
+                        Register(navController = navController, database)
+                    }
+                    composable(route = "Detail/{id}") {backStackEntry ->
+                        isDrawerVisible.value = false
+                        detail.value = true
+                        var data = backStackEntry.arguments?.getString("id") ?:""
+                        id.value = data.toInt()
+                        Detail(navController = navController, database = database, id = id.value)
                     }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DrawerPreview() {
-    ProjectTheme {
-        val navController = rememberNavController()
-        Drawer(navController = navController)
     }
 }

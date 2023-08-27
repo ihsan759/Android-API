@@ -1,5 +1,6 @@
 package com.example.project.ui.sideBar
 
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,14 +19,14 @@ import androidx.navigation.NavController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawerContent(navController: NavController, drawerState: DrawerState){
+fun DrawerContent(navController: NavController, drawerState: DrawerState, context: Context){
     Column (
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        NavigationDrawerItems(navController, drawerState)
+        NavigationDrawerItems(navController, drawerState, context)
         Spacer(modifier = Modifier.weight(1f))
     }
 }

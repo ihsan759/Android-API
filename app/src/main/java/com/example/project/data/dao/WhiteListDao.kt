@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WhiteListDao{
     @Query("SELECT * FROM whitelist WHERE idUser = :idUser")
-    fun getAll(idUser: WhiteList): Flow<List<WhiteList>>
+    fun getAll(idUser: Int): WhiteList?
 
     @Insert
     suspend fun insert(whiteList: WhiteList)
 
     @Query("Delete FROM whitelist WHERE id = :id")
-    suspend fun delete(id: Int): Flow<WhiteList>
+    suspend fun delete(id: Int): Int
 }

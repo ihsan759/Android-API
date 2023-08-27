@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "WhiteList")
 class WhiteList(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val idUser: Int,
     val idFilm: String
 )

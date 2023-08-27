@@ -1,5 +1,7 @@
 package com.example.project.ui.user
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,20 +40,26 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.edit
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.project.R
+import com.example.project.data.database.AppDatabase
 import com.example.project.ui.theme.ProjectTheme
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Login(navController: NavController) {
+    fun Login(navController: NavController, database: AppDatabase, context: Context) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
     var isUsernameValid by remember { mutableStateOf(true) }
     var isPasswordValid by remember { mutableStateOf(true) }
+
+    val userDao = database.userDao()
+    var showError by remember { mutableStateOf(false) }
 
     val text = buildAnnotatedString {
         withStyle(style = SpanStyle(color = Color.White)) {
@@ -86,6 +94,14 @@ fun Login(navController: NavController) {
             )
 
             Spacer(modifier = Modifier.height(30.dp))
+
+            if (showError) {
+                Text(
+                    text = "Invalid username or password",
+                    color = Color.Red,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
 
             TextField(
                 value = username,
@@ -137,7 +153,19 @@ fun Login(navController: NavController) {
                     isUsernameValid = username.isNotBlank()
                     isPasswordValid = password.isNotBlank()
                     if (isUsernameValid && isPasswordValid) {
-                        navController.navigate("Home")
+                      val user = runBlocking {
+                            userDao.getUserByUsernameAndPassword(username, password)
+                      }
+                        if (user != null){
+                            val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+                            sharedPreferences.edit {
+                                putInt("id", user.id)
+                                putBoolean("isLogged", true)
+                            }
+                            navController.navigate("Home")
+                        }else{
+                            showError = true
+                        }
                     }
                 }
             ) {
@@ -155,13 +183,4 @@ fun Login(navController: NavController) {
         }
     }
 
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    ProjectTheme {
-        val navController = rememberNavController()
-        Login(navController = navController)
-    }
 }
