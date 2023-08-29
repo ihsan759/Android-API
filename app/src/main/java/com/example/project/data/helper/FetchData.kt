@@ -17,7 +17,6 @@ suspend fun fetchDetail(authorization: String, id: Int): MovieDetailResponse {
             MovieDetailResponse(
                 false,
                 "",
-                null,
                 0,
                 emptyList(),
                 "",
@@ -45,11 +44,24 @@ suspend fun fetchDetail(authorization: String, id: Int): MovieDetailResponse {
     }
 }
 
-suspend fun fetchDataNowPlaying(authorization: String): MovieResponse {
+suspend fun fetchDataTopRated(authorization: String): MovieResponse {
     return withContext(Dispatchers.IO) {
         try {
             val apiService = RetrofitClient.movieService
-            val response = apiService.getNowPlaying(authorization)
+            val response = apiService.getTopRated(authorization)
+            response
+        } catch (e: Exception) {
+            // Handle error
+            MovieResponse(0, emptyList(), 0, 0)
+        }
+    }
+}
+
+suspend fun fetchDataPopular(authorization: String): MovieResponse {
+    return withContext(Dispatchers.IO) {
+        try {
+            val apiService = RetrofitClient.movieService
+            val response = apiService.getPopular(authorization)
             response
         } catch (e: Exception) {
             // Handle error

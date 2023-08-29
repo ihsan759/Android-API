@@ -3,7 +3,6 @@ package com.example.project
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.example.project.data.database.AppDatabase
 import com.example.project.ui.sideBar.Drawer
@@ -16,7 +15,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ProjectTheme {
-                val navController = rememberNavController()
                 database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "app_database")
                     .build()
                 Drawer(database)

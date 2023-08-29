@@ -8,7 +8,10 @@ import retrofit2.http.Path
 
 interface MovieService {
     @GET("top_rated")
-    suspend fun getNowPlaying(@Header("Authorization") token: String): MovieResponse
+    suspend fun getTopRated(@Header("Authorization") token: String): MovieResponse
+
+    @GET("popular")
+    suspend fun getPopular(@Header("Authorization") token: String): MovieResponse
 
     @GET("{movieId}")
     suspend fun getDetail(@Path("movieId") movieId: Int, @Header("Authorization") token: String): MovieDetailResponse

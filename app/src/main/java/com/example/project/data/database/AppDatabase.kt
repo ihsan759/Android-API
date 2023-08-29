@@ -10,5 +10,5 @@ import com.example.project.data.model.WhiteList
 @Database(entities = [User::class, WhiteList::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
-    abstract fun whiteList(): WhiteListDao
+    abstract fun whiteListDao(): WhiteListDao
 }

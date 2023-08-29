@@ -1,7 +1,6 @@
 package com.example.project.ui.movie
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,24 +14,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.project.data.configuration.RetrofitClient
 import com.example.project.data.database.AppDatabase
+import com.example.project.data.helper.ClickableLinkText
 import com.example.project.data.helper.fetchDetail
 import com.example.project.data.model.MovieDetailResponse
-import com.example.project.data.model.MovieResponse
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 @Composable
-fun Detail(navController: NavController, database: AppDatabase, id: Int) {
+fun Detail(id: Int) {
 
     val response = remember { mutableStateOf<MovieDetailResponse?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -71,6 +66,10 @@ fun Detail(navController: NavController, database: AppDatabase, id: Int) {
             Text(text = "${result?.title}", fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "${result?.overview}")
+            Spacer(modifier = Modifier.height(16.dp))
+            if (result?.homepage != ""){
+                ClickableLinkText(uri = result?.homepage ?: "", hyperlinkText = "Click Here To HomePage")
+            }
         }
     }
 }

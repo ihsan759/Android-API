@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
@@ -18,6 +19,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,12 +31,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.project.data.database.AppDatabase
+import com.example.project.data.model.WhiteList
 import com.example.project.ui.movie.BookMark
 import com.example.project.ui.movie.Detail
 import com.example.project.ui.movie.Home
 import com.example.project.ui.user.Login
 import com.example.project.ui.user.Register
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +51,7 @@ fun Drawer(database: AppDatabase) {
     val isDrawerVisible = remember { mutableStateOf(false) }
     val context = LocalContext.current
     val detail = remember { mutableStateOf(false) }
+    val isBookmark = remember { mutableStateOf(false) }
     val id = remember { mutableStateOf(0) }
     val sharedPrefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
     ModalNavigationDrawer(drawerContent = {
@@ -90,9 +97,38 @@ fun Drawer(database: AppDatabase) {
                     },
                     actions = {
                         if (id.value != 0 && sharedPrefs.getBoolean("isLogged",false)){
-                            IconButton(onClick = { /* Handle navigation icon click */ }) {
+                            val whiteListDao = database.whiteListDao()
+                            LaunchedEffect(Unit) {
+                                // Get bookmark status based on current id and user
+                                val isBookmarked = withContext(Dispatchers.IO) {
+                                    whiteListDao.get(id.value, sharedPrefs.getInt("id", 0)) != null
+                                }
+                                isBookmark.value = isBookmarked
+                            }
+
+                            IconButton(
+                                onClick = {
+
+                                    val cek = runBlocking {
+                                        whiteListDao.get(id.value, sharedPrefs.getInt("id",0))
+                                    }
+                                    if (cek != null){
+                                        runBlocking {
+                                            whiteListDao.delete(cek.id)
+                                        }
+                                        isBookmark.value = false
+                                    }else{
+                                        val newWhieList = WhiteList(idFilm = id.value, idUser = sharedPrefs.getInt("id",0))
+                                        runBlocking {
+                                            whiteListDao.insert(newWhieList)
+                                        }
+
+                                        isBookmark.value = true
+                                    }
+                                }
+                            ) {
                                 Icon(
-                                    imageVector = Icons.Default.FavoriteBorder,
+                                    imageVector = if(isBookmark.value) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                     contentDescription = null,
                                     tint = Color.Yellow
                                 )
@@ -128,7 +164,7 @@ fun Drawer(database: AppDatabase) {
                         detail.value = true
                         var data = backStackEntry.arguments?.getString("id") ?:""
                         id.value = data.toInt()
-                        Detail(navController = navController, database = database, id = id.value)
+                        Detail(id = id.value)
                     }
                 }
             }

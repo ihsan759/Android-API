@@ -10,14 +10,14 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.project.R
 import com.example.project.data.database.AppDatabase
 import com.example.project.data.model.User
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
@@ -50,6 +50,13 @@ fun Register(navController: NavController, database: AppDatabase) {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                text = "Register",
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             TextField(
                 value = name,
                 onValueChange = {

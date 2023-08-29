@@ -7,5 +7,5 @@ import androidx.room.PrimaryKey
 class WhiteList(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val idUser: Int,
-    val idFilm: String
+    val idFilm: Int
 )
